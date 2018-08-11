@@ -28,7 +28,7 @@ class Squizz extends TileSprite {
     const { pos, scale, speed, anchor, anims, controls } = this
     const { x } = controls
 
-    pos.x += x * dt * 100 * speed
+    pos.x += x * dt * 100 * speed // 100 = multiplier to scale speed
 
     if (x) {
       anims.play('walk')
