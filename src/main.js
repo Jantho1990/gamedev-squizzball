@@ -1,16 +1,19 @@
-import pop from "../pop/index.js"
-const { Game, Texture, TileSprite, math } = pop
+import pop from '../pop/'
+const { Game, KeyControls } = pop
+import Squizz from './entities/Squizz'
 
 const game = new Game(640, 320)
 const { scene, w, h } = game
 
-const texture = new Texture("res/img/player-walk.png")
-const squizz = scene.add(new TileSprite(texture, 32, 32))
-squizz.pos = { x: w / 2, y: h / 2}
+const controls = new KeyControls()
 
-game.run(() => {
-  // Randomly change x frame:
-  if (math.randOneIn(20)) {
-    squizz.frame.x = math.rand(3)
+for (let i = 0; i < 20; i++) {
+  const squizz = new Squizz(controls)
+  squizz.pos = {
+    x: Math.random() * w,
+    y: Math.random() * h
   }
-})
+  scene.add(squizz)
+}
+
+game.run()
