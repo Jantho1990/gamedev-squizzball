@@ -1,5 +1,5 @@
 import pop from '../pop/'
-const { Game, KeyControls, Texture, math, TileMap } = pop
+const { Game, KeyControls, Texture, math, entity, TileMap } = pop
 import Squizz from './entities/Squizz'
 import Level from './Level'
 
@@ -31,4 +31,6 @@ game.run(() => {
   // Confine player pos to the bounds area
   pos.x = math.clamp(pos.x, left, right)
   pos.y = math.clamp(pos.y, top, bottom)
+  // See if we're on new ground
+  const ground = level.checkGround(entity.center(squizz))
 })

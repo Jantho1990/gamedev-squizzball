@@ -9,10 +9,12 @@ import TileMap from './TileMap'
 import TileSprite from './TileSprite'
 import Game from './Game'
 import math from './utils/math'
+import entity from './utils/entity'
 
 export default {
     CanvasRenderer,
     Container,
+    entity,
     Game,
     KeyControls,
     MouseControls,

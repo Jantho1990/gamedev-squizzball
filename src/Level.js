@@ -10,6 +10,7 @@ class Level extends TileMap {
     const mapH = Math.ceil(h / tileSize)
 
     const level = []
+    let totalFreeSpots = 0
     for (let i = 0; i < mapW * mapH; i++) {
       const isTopOrBottom = i < mapW || Math.floor(i / mapW) === mapH - 1
       const isLeft = i % mapW === 0
@@ -27,19 +28,9 @@ class Level extends TileMap {
       } else {
         // Random ground tile
         level.push({ x: math.rand(1, 5), y: 0 })
+        totalFreeSpots++
       }
     }
-
-    // Make a random level of tile indexes
-    /* const level = []
-    for (let y = 0; y < mapH; y++) {
-      for (let x = 0; x < mapW; x++) {
-        level.push({
-          x: math.rand(5),
-          y: math.rand(2)
-        })
-      }
-    } */
 
     super(level, mapW, mapH, tileSize, tileSize, texture)
 
@@ -49,6 +40,24 @@ class Level extends TileMap {
       top: tileSize * 2,
       bottom: h - tileSize * 2
     }
+
+    this.blank = { x: 0, y: 0 }
+    this.lastTile = null
+    this.totalFreeSpots = totalFreeSpots
+  }
+
+  checkGround(pos) {
+    const { blank, lastTile } = this
+    const tile = this.tileAtPixelPos(pos)
+    if (lastTile === tile) {
+      return 'checked'
+    }
+    this.lastTile = tile
+    if (tile.frame !== blank) {
+      this.setFrameAtPixelPos(pos, blank)
+      return 'solid'
+    }
+    return 'cleared'
   }
 }
 
