@@ -1,3 +1,7 @@
+export function clamp(x, min, max) {
+  return Math.max(min, Math.min(x, max))
+}
+
 export function rand(min, max) {
   return Math.floor(randf(min, max))
 }
@@ -22,5 +26,6 @@ export default {
   rand,
   randf,
   randOneIn,
-  randOneFrom
+  randOneFrom,
+  clamp
 }

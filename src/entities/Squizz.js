@@ -6,38 +6,48 @@ class Squizz extends TileSprite {
   constructor(controls) {
     super(texture, 32, 32)
     this.controls = controls
-    this.anchor = { x: -16, y: -16 }
-    this.speed = math.randf(0.9, 1.2)
 
     // Set up animations
     const { anims } = this
-    anims.add('walk', [0, 1, 2, 3].map(x => ({ x, y: 0 })), 0.07 * this.speed)
+    anims.add('walk', [0, 1, 2, 3].map(x => ({ x, y: 0 })), 0.1)
     anims.add(
       'idle',
       [{ x: 0, y: 0}, { x: 4, y: 0 }, {x: 4, y: 1 }, { x: 4, y: 0 }],
-      0.15 * this.speed
+      0.1
     )
-
-    // Play an animation
     anims.play('walk')
+
+    this.speed = 0.15 // number of seconds it takes to travel to one tile
+    this.dir = {
+      x: 1,
+      y: 0
+    }
+    this.nextCell = this.speed // enables us to "snap" to the next cell by being equal to the speed
   }
   
   update(dt, t) {
     super.update(dt)
 
-    const { pos, scale, speed, anchor, anims, controls } = this
-    const { x } = controls
+    const { pos, speed, controls, dir, anims } = this
 
-    pos.x += x * dt * 100 * speed // 100 = multiplier to scale speed
+    // pos.x += x * dt * 100 * speed // 100 = multiplier to scale speed
 
-    if (x) {
-      anims.play('walk')
-      // Flip to correct direction
-      scale.x = Math.sign(x)
-      anchor.x = scale.x > 0 ? -16 : 16
-    } else {
-      anims.play('idle')
+    if ((this.nextCell -= dt) <= 0) {
+      this.nextCell += speed
+      const { x, y } = controls
+      if (x && x !== dir.x) {
+        dir.x = x
+        dir.y = 0
+        pos.y = Math.round(pos.y / 32) * 32
+      } else if (y && y !== dir.y) {
+        dir.x = 0
+        dir.y = y
+        pos.x = Math.round(pos.x / 32) * 32
+      }
     }
+
+    pos.x += dir.x * dt * (32 / speed)
+    pos.y += dir.y * dt * (32 / speed)
   }
 }
 

@@ -11,13 +11,24 @@ scene.add(level)
 
 const controls = new KeyControls()
 
-for (let i = 0; i < 20; i++) {
-  const squizz = new Squizz(controls)
+const squizz = new Squizz(controls)
+squizz.pos = {
+  x: w / 2,
+  y: h / 2
+}
+scene.add(squizz)
+/* for (let i = 0; i < 20; i++) {
   squizz.pos = {
     x: Math.random() * w,
     y: Math.random() * h
   }
   scene.add(squizz)
-}
+} */
 
-game.run()
+game.run(() => {
+  const { pos } = squizz
+  const { bounds : { top, bottom, right, left }} = level
+  // Confine player pos to the bounds area
+  pos.x = math.clamp(pos.x, left, right)
+  pos.y = math.clamp(pos.y, top, bottom)
+})
