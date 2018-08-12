@@ -5,7 +5,7 @@ import Squizz from '../entities/Squizz'
 import Baddie from '../entities/Baddie'
 import Level from '../Level'
 
-const SCORE_PELLET = 0
+const SCORE_PELLET = 8
 
 const textures = {
   squizz: new Texture('res/img/player-walk.png')
@@ -137,9 +137,15 @@ class GameScreen extends Container {
 
     // Confine player to the level bounds
     const { pos } = squizz
+    const oldPos = Object.assign({}, pos)
     const { bounds : { top, bottom, right, left }} = level
     pos.x = math.clamp(pos.x, left, right)
     pos.y = math.clamp(pos.y, top, bottom)
+    /* if (pos.x === oldPos.x && pos.y === oldPos.y) {
+      squizz.idle()
+    } else {
+      squizz.walk()
+    } */
 
     // See if we're on new ground
     const ground = level.checkGround(entity.center(squizz))
