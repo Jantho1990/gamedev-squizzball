@@ -19,6 +19,10 @@ class Anim {
       this.curTime -= rate
     }
   }
+
+  get currentFrame() {
+    return this.curFrame % this.frames.length
+  }
 }
 
 class AnimManager {
@@ -54,6 +58,10 @@ class AnimManager {
 
   stop() {
     this.current = null
+  }
+
+  getCurrentFrame() {
+    return this.anims[this.current].currentFrame
   }
 }
 

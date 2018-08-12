@@ -9,7 +9,7 @@ class Squizz extends TileSprite {
 
     // Set up animations
     const { anims } = this
-    anims.add('walk', [0, 1, 2, 3, 4].map(x => ({ x, y: 0 })), 0.1)
+    anims.add('walk', [0, 1, 2, 3, 4, 4, 4, 4].map(x => ({ x, y: 0 })), 0.05)
     /* anims.add(
       'walk',
       [{ x: 0, y: 0}, { x: 1, y: 0 }, {x: 2, y: 1 }, { x: 3, y: 0 }],
@@ -33,6 +33,7 @@ class Squizz extends TileSprite {
     this.nextCell = this.speed // enables us to "snap" to the next cell by being equal to the speed
 
     this.fixedPos = false // Allows entity to stand still
+    this.isIdle = false // Entity should be still
   }
 
   powerUpFor(seconds = 3) {
@@ -45,6 +46,7 @@ class Squizz extends TileSprite {
   }
 
   idle() {
+    this.isIdle = true
     this.speed = 0
     this.dir = {
       x: 0,
@@ -64,18 +66,22 @@ class Squizz extends TileSprite {
     this.fastTime = 0
     this.anims.play('walk')
     this.fixedPos = false
+    this.isIdle = false
   }
   
   update(dt, t) {
     super.update(dt)
 
-    const { pos, minSpeed, speed, controls, dir, anims } = this
+    const { pos, minSpeed, speed, controls, dir, anims, scale, anchor } = this
 
     // pos.x += x * dt * 100 * speed // 100 = multiplier to scale speed
 
+    
     if ((this.nextCell -= dt) <= 0) {
       this.nextCell += speed
       const { x, y } = controls
+      // scale.x = Math.sign(x)
+      // anchor.x = scale.x > 0 ? -16 : 16
       if (x && x !== dir.x) {
         dir.x = x
         dir.y = 0
@@ -90,6 +96,14 @@ class Squizz extends TileSprite {
     // Speed adjustments
     if (this.speed > minSpeed) {
       this.speed -= dt
+    }
+
+    // Trigger speed pause
+    let cf = anims.getCurrentFrame()
+    if (cf > 4) {
+      this.fixedPos = true
+    } else if (this.fixedPos && !this.isIdle) {
+      this.fixedPos = false
     }
 
     if (!this.fixedPos) {
