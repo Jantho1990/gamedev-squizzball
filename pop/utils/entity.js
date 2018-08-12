@@ -13,5 +13,6 @@ export function distance(a, b) {
 }
 
 export default {
-  center
+  center,
+  distance
 }

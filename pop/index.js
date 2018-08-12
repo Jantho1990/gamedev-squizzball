@@ -8,10 +8,12 @@ import Texture from './Texture'
 import TileMap from './TileMap'
 import TileSprite from './TileSprite'
 import Game from './Game'
+import Camera from './Camera'
 import math from './utils/math'
 import entity from './utils/entity'
 
 export default {
+    Camera,
     CanvasRenderer,
     Container,
     entity,

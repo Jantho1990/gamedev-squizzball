@@ -34,5 +34,6 @@ export default {
   randf,
   randOneIn,
   randOneFrom,
-  clamp
+  clamp,
+  distance
 }
