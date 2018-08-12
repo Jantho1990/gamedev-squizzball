@@ -72,7 +72,8 @@ class Squizz extends TileSprite {
   update(dt, t) {
     super.update(dt)
 
-    const { pos, minSpeed, speed, controls, dir, anims, scale, anchor } = this
+    const { pos, minSpeed, controls, dir, anims, scale, anchor } = this
+    let speed = this.speed
 
     // pos.x += x * dt * 100 * speed // 100 = multiplier to scale speed
 
@@ -96,6 +97,9 @@ class Squizz extends TileSprite {
     // Speed adjustments
     if (this.speed > minSpeed) {
       this.speed -= dt
+    }
+    if ((this.fastTime -= dt) > 0) {
+      speed /= 1.33;
     }
 
     // Trigger speed pause
