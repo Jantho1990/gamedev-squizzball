@@ -1,9 +1,10 @@
 import pop from '../../pop/'
 const { Camera, Container, Text, Texture, TileSprite, math, entity } = pop
 
+import Level from '../Level'
 import Squizz from '../entities/Squizz'
 import Baddie from '../entities/Baddie'
-import Level from '../Level'
+import Cloud from '../entities/Cloud'
 
 const SCORE_PELLET = 8
 
@@ -76,6 +77,11 @@ class GameScreen extends Container {
     return baddies
   }
 
+  addCloud(pos) {
+    const { camera } = this
+    camera.add(new Cloud(pos))
+  }
+
   addScore(score) {
     const { stats, gui } = this
     const complete = stats.pellets / stats.maxPellets * 100
@@ -117,6 +123,7 @@ class GameScreen extends Container {
     const { squizz, stats } = this
 
     squizz.reset()
+    this.addCloud(squizz.pos)
 
     if (--stats.lives === 0) {
       this.gameOver(stats)
@@ -166,6 +173,7 @@ class GameScreen extends Container {
       const { pos } = b
       if (entity.distance(squizz, b) < 32) {
         // A hit!
+        this.addCloud(pos)
         this.loseLife()
 
         // Send off screen for a bit
