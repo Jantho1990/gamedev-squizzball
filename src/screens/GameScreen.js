@@ -267,7 +267,7 @@ class GameScreen extends Container {
             this.addScore(SCORE_POWERBALL)
             break;
           case "shoes":
-            squizz.fastTime = 3
+            squizz.fastTime += 3
             break;
           case "death":
             this.loseLife()
