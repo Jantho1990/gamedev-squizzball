@@ -1,18 +1,20 @@
 import pop from '../../pop/'
-const {
-  Container,
-  Camera,
-  entity,
-  math
-} = pop
+const { Camera, Container, Text, Texture, TileSprite, math, entity } = pop
 
 import Squizz from '../entities/Squizz'
 import Baddie from '../entities/Baddie'
 import Level from '../Level'
 
+const SCORE_PELLET = 0
+
+const textures = {
+  squizz: new Texture('res/img/player-walk.png')
+}
+
 class GameScreen extends Container {
-  constructor(game, controls) {
+  constructor(game, controls, gameOver) {
     super()
+    this.gameOver = gameOver
 
     const level = new Level(game.w * 3, game.h * 2)
     const squizz = new Squizz(controls)
@@ -41,6 +43,18 @@ class GameScreen extends Container {
     camera.add(this.baddies)
     camera.add(squizz)
 
+    // Add static graphic elements
+    this.gui = this.createGUI(game)
+
+    this.stats = {
+      pellets: 0,
+      maxPellets: level.totalFreeSpots,
+      lives: 3,
+      score: 0
+    }
+
+    this.updateLivesIcons()
+
     // Keep references for update
     this.level = level
     this.camera = camera
@@ -62,12 +76,61 @@ class GameScreen extends Container {
     return baddies
   }
 
+  addScore(score) {
+    const { stats, gui } = this
+    const complete = stats.pellets / stats.maxPellets * 100
+
+    stats.score += score
+    gui.score.text = stats.score
+    gui.complete.text = `${complete.toFixed(1)}%`
+  }
+
+  createGUI(game) {
+    const font = { font: "28pt 'VT323', monospace", fill: "#5f0" }
+    const complete = this.add(new Text("", font))
+    const score = this.add(new Text("", Object.assign({ align: "center"}, font)))
+    complete.pos = { x: 20, y: 20 }
+    score.pos = { x: game.w / 2, y: 20 }
+
+    this.livesIcons = Array.from(new Array(4), (_, i) => {
+      const icon = this.add(new TileSprite(textures.squizz, 32, 32))
+      icon.pos = {
+        x: game.w - 48,
+        y: i * 48 + 180
+      };
+      return icon
+    })
+
+    return {
+      complete,
+      score
+    }
+  }
+
+  updateLivesIcons() {
+    this.livesIcons.forEach((icon, i) => {
+      icon.visible = i < this.stats.lives - 1;
+    })
+  }
+
+  loseLife() {
+    const { squizz, stats } = this
+
+    squizz.reset()
+
+    if (--stats.lives === 0) {
+      this.gameOver(stats)
+    }
+    this.updateLivesIcons()
+  }
+
   update(dt, t) {
     super.update(dt, t)
-    const { squizz, level } = this
+    const { squizz, level, stats } = this
 
     // Make the game harder the longer you play
-    squizz.speed -= 0.003 * dt
+    squizz.minSpeed -= 0.005 * dt
+    squizz.speed -= 0.004 * dt
 
     // Update game containers
     this.updateBaddies()
@@ -80,9 +143,15 @@ class GameScreen extends Container {
 
     // See if we're on new ground
     const ground = level.checkGround(entity.center(squizz))
-    if (ground === 'cleared') {
-      squizz.dead = true
+    if (ground === 'solid') {
+      stats.pellets++
+      this.addScore(SCORE_PELLET)
     }
+    if (ground === 'cleared' && !squizz.isPoweredUp) {
+      this.loseLife()
+    }
+    // Flash the background if in powerup mode
+    level.blank.y = squizz.isPoweredUp && ((t / 100) % 2) | 0 ? 1 : 0
   }
 
   updateBaddies() {
@@ -91,7 +160,7 @@ class GameScreen extends Container {
       const { pos } = b
       if (entity.distance(squizz, b) < 32) {
         // A hit!
-        squizz.dead = true
+        this.loseLife()
 
         // Send off screen for a bit
         if (b.xSpeed) pos.x = -level.w

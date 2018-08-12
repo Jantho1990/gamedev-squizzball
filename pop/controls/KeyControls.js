@@ -52,7 +52,10 @@ class KeyControls {
     }
 
     reset () {
-        this.keys = this.keys.forEach(key => this.keys[key] = false)
+        // this.keys = this.keys.forEach(key => this.keys[key] = false)
+        for (let key in this.keys) {
+            this.keys[key] = false;
+        }
     }
 }
 export default KeyControls
