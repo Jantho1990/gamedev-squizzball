@@ -5,10 +5,16 @@ import Level from '../Level'
 import Squizz from '../entities/Squizz'
 import Baddie from '../entities/Baddie'
 import Cloud from '../entities/Cloud'
+import Jackpot from '../entities/Jackpot'
+import Pickup from '../entities/Pickup'
 
+const SCORE_BADDIES = 999
+const SCORE_JACKPOT = 51
 const SCORE_PELLET = 8
+const SCORE_POWERBALL = 42
 
 const textures = {
+  jackpots: new Texture("res/img/jackpots.png"),
   squizz: new Texture('res/img/player-walk.png')
 }
 
@@ -40,18 +46,25 @@ class GameScreen extends Container {
     // Add roaming baddies
     this.baddies = this.addBaddies(level)
 
+    // Refueling power-ups
+    this.pickups = new Container()
+    this.lastPickupAt = 0
+
     camera.add(level)
+    camera.add(this.pickups)
     camera.add(this.baddies)
     camera.add(squizz)
 
     // Add static graphic elements
     this.gui = this.createGUI(game)
+    this.letters = this.createBonusLetters()
 
     this.stats = {
       pellets: 0,
       maxPellets: level.totalFreeSpots,
       lives: 3,
-      score: 0
+      score: 0,
+      lettersHave: ''
     }
 
     this.updateLivesIcons()
@@ -77,9 +90,27 @@ class GameScreen extends Container {
     return baddies
   }
 
+  addBonusLetter() {
+    const { level, pickups } = this
+    const p = pickups.add(new Jackpot())
+    p.pos = level.getRandomPos()
+  }
+
   addCloud(pos) {
     const { camera } = this
     camera.add(new Cloud(pos))
+  }
+
+  addPickup() {
+    const { stats, level, pickups } = this
+    const pickup = math.randOneFrom(Pickup.pickups)
+    const p = pickups.add(new Pickup(pickup))
+    if (pickup === "death") {
+      // One less cell that user can possibly fill
+      stats.maxPellets--
+      p.life *= 3 // death stays for a long time.
+    }
+    p.pos = level.getRandomPos()
   }
 
   addScore(score) {
@@ -89,6 +120,17 @@ class GameScreen extends Container {
     stats.score += score
     gui.score.text = stats.score
     gui.complete.text = `${complete.toFixed(1)}%`
+  }
+
+  createBonusLetters() {
+    return Jackpot.BONUS_WORD.split("").map((ch, i) => {
+      const letter = this.add(new TileSprite(textures.jackpots, 32, 32))
+      letter.frame.x = i
+      letter.pos = { x: 10, y: i * 32 + 128 }
+      letter.scale = { x: 0.75, y: 0.75 }
+      letter.visible = false
+      return letter
+    });
   }
 
   createGUI(game) {
@@ -110,6 +152,23 @@ class GameScreen extends Container {
     return {
       complete,
       score
+    }
+  }
+
+  pickupBonusLetter(letter) {
+    const { stats, letters } = this
+    if (stats.lettersHave.indexOf(letter) !== -1) {
+      // Already have this letter
+      return
+    }
+    stats.lettersHave += letter
+    letters[Jackpot.BONUS_WORD.indexOf(letter)].visible = true
+    if (stats.lettersHave.length === Jackpot.BONUS_WORD.length) {
+      // FREE LIFE!
+      stats.lives += 1
+      stats.lettersHave = ""
+      letters.forEach(l => (l.visible = false))
+      this.updateLivesIcons()
     }
   }
 
@@ -140,6 +199,7 @@ class GameScreen extends Container {
     squizz.speed -= 0.004 * dt
 
     // Update game containers
+    this.updatePickups(t)
     this.updateBaddies()
 
     // Confine player to the level bounds
@@ -185,6 +245,42 @@ class GameScreen extends Container {
       if (pos.x > level.w) pos.x = -32
       if (pos.y > level.h) pos.y = -32
     })
+  }
+
+  updatePickups(t) {
+    const { squizz, lastPickupAt } = this
+
+    // Check for collisions
+    this.pickups.map(p => {
+      if (entity.distance(squizz, p) < 32) {
+        switch (p.name) {
+          case "jackpots":
+            this.pickupBonusLetter(p.letter)
+            this.addScore(SCORE_JACKPOT)
+            break;
+          case "bomb":
+            squizz.powerUpFor(4)
+            this.addScore(SCORE_POWERBALL)
+            break;
+          case "shoes":
+            squizz.fastTime = 3
+            break;
+          case "death":
+            this.loseLife()
+        }
+        p.dead = true
+      }
+    })
+
+    // Add new pickup item
+    if (t - lastPickupAt > 1) {
+      this.lastPickupAt = t
+      this.addPickup()
+      // ... and maybe a bonus letter
+      if (math.randOneIn(3)) {
+        this.addBonusLetter()
+      }
+    }
   }
 }
 

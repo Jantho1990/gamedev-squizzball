@@ -1,4 +1,4 @@
-import pop from '../../pop/index.js'
+import pop from '../../pop/'
 const { math, Sprite, Texture } = pop;
 
 const texture = new Texture('res/img/cloud.png')

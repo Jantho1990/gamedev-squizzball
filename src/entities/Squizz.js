@@ -10,6 +10,7 @@ class Squizz extends TileSprite {
     // Set up animations
     const { anims } = this
     anims.add('walk', [0, 1, 2, 3].map(x => ({ x, y: 0 })), 0.1)
+    anims.add("power", [0, 1, 2, 3].map(x => ({ x, y: 1 })), 0.07)
     anims.add(
       'idle',
       [{ x: 0, y: 0}, { x: 4, y: 0 }, {x: 4, y: 1 }, { x: 4, y: 0 }],
@@ -29,6 +30,15 @@ class Squizz extends TileSprite {
     this.fixedPos = false // Allows entity to stand still
   }
 
+  powerUpFor(seconds = 3) {
+    this.powerupTime = seconds
+    this.anims.play("power")
+  }
+
+  get isPoweredUp() {
+    return this.powerupTime > 0
+  }
+
   idle() {
     this.speed = 0
     this.dir = {
@@ -45,6 +55,8 @@ class Squizz extends TileSprite {
 
   reset() {
     this.speed = this.minSpeed * 5
+    this.powerupTime = 0
+    this.fastTime = 0
     this.anims.play('walk')
     this.fixedPos = false
   }
@@ -78,6 +90,19 @@ class Squizz extends TileSprite {
     if (!this.fixedPos) {
       pos.x += dir.x * dt * (32 / speed)
       pos.y += dir.y * dt * (32 / speed)
+    }
+
+    // Powerball blink mode!
+    this.visible = true;
+    if (this.powerupTime > 0) {
+      const time = this.powerupTime -= dt
+      // Blink when nearly done
+      if (time < 1.5) {
+        this.visible = t / 0.1 % 2 | 0
+      }
+      if (time < 0) {
+        anims.play("walk")
+      }
     }
   }
 }
