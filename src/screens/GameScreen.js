@@ -234,7 +234,11 @@ class GameScreen extends Container {
       if (entity.distance(squizz, b) < 32) {
         // A hit!
         this.addCloud(pos)
-        this.loseLife()
+        this.addScore(SCORE_BADDIES)
+        
+        if (!squizz.isPoweredUp) {
+          this.loseLife()
+        }
 
         // Send off screen for a bit
         if (b.xSpeed) pos.x = -level.w

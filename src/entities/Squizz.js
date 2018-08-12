@@ -9,7 +9,12 @@ class Squizz extends TileSprite {
 
     // Set up animations
     const { anims } = this
-    anims.add('walk', [0, 1, 2, 3].map(x => ({ x, y: 0 })), 0.1)
+    anims.add('walk', [0, 1, 2, 3, 4].map(x => ({ x, y: 0 })), 0.1)
+    /* anims.add(
+      'walk',
+      [{ x: 0, y: 0}, { x: 1, y: 0 }, {x: 2, y: 1 }, { x: 3, y: 0 }],
+      0.1
+    ) */
     anims.add("power", [0, 1, 2, 3].map(x => ({ x, y: 1 })), 0.07)
     anims.add(
       'idle',
