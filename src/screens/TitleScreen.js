@@ -30,7 +30,8 @@ class TitleScreen extends Container {
       action: false
     }
     const squizz = this.add(new Squizz(fakeControls))
-    squizz.update = () => {}
+    // squizz.update = (dt) => {super.update(dt)}
+    squizz.idle()
     squizz.pos = { x: 140, y: 200}
   }
 

@@ -25,11 +25,28 @@ class Squizz extends TileSprite {
       y: 0
     }
     this.nextCell = this.speed // enables us to "snap" to the next cell by being equal to the speed
+
+    this.fixedPos = false // Allows entity to stand still
+  }
+
+  idle() {
+    this.speed = 0
+    this.dir = {
+      x: 0,
+      y: 0
+    }
+    this.anims.play('idle')
+    this.fixedPos = true
+  }
+
+  walk() {
+    this.reset()
   }
 
   reset() {
     this.speed = this.minSpeed * 5
     this.anims.play('walk')
+    this.fixedPos = false
   }
   
   update(dt, t) {
@@ -58,8 +75,10 @@ class Squizz extends TileSprite {
       this.speed -= dt
     }
 
-    pos.x += dir.x * dt * (32 / speed)
-    pos.y += dir.y * dt * (32 / speed)
+    if (!this.fixedPos) {
+      pos.x += dir.x * dt * (32 / speed)
+      pos.y += dir.y * dt * (32 / speed)
+    }
   }
 }
 
